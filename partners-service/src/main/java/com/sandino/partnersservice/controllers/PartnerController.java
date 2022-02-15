@@ -4,7 +4,7 @@ import com.sandino.partnersservice.dtos.PartnerRequestDTO;
 import com.sandino.partnersservice.dtos.PartnerResponseDTO;
 import com.sandino.partnersservice.dtos.PersonResponseDTO;
 import com.sandino.partnersservice.entities.Partner;
-import com.sandino.partnersservice.exceptions.PersonNotFoundException;
+import com.sandino.partnersservice.exceptions.PartnerNotFoundException;
 import com.sandino.partnersservice.services.PartnerService;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -52,9 +52,9 @@ public class PartnerController {
                     restTemplate.getForObject(people + "/" + partner.getUserId(), PersonResponseDTO.class);
 
             return ResponseEntity.ok(new PartnerResponseDTO(partner, personResponseDTO));
-        } catch (PersonNotFoundException e) {
+        } catch (PartnerNotFoundException e) {
             return ResponseEntity.badRequest()
-                    .body("Person Not Found");
+                    .body("Partner Not Found");
         }
     }
 

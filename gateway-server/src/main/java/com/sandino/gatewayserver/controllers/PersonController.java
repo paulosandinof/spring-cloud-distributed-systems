@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -30,11 +31,8 @@ public class PersonController {
     @Retry(name = "BACKEND", fallbackMethod = "fallback")
     @GetMapping
     public ResponseEntity<Object> getPeople() {
-        return restTemplate.exchange(people,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {
-                });
+        Object[] body = restTemplate.getForEntity(people, Object[].class).getBody();
+        return ResponseEntity.ok(body);
     }
 
     @CircuitBreaker(name = "BACKEND", fallbackMethod = "fallback")
@@ -77,6 +75,10 @@ public class PersonController {
 
     public ResponseEntity<Object> fallback(CallNotPermittedException e) {
         return ResponseEntity.internalServerError().body("Circuit Breaker is OPEN");
+    }
+
+    public ResponseEntity<Object> fallback(HttpClientErrorException.BadRequest e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     public ResponseEntity<Object> fallback(Exception e) {
